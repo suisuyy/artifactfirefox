@@ -1,0 +1,37 @@
+{
+  "manifest_version": 3,
+  "name": "AIartifact",
+  "version": "1.5",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "declarativeNetRequest",
+    "declarativeNetRequestWithHostAccess",
+    "scripting"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "options_page": "options.html",
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "action": {
+    "default_icon": "icon.png",
+    "default_popup": "popup.html"
+
+  },
+  "declarative_net_request": {
+    "rule_resources": [{
+      "id": "ruleset",
+      "enabled": true,
+      "path": "rules.json"
+    }]
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "woiceatus@gmail.com"
+    }
+  }
+  
+}
