@@ -1,20 +1,50 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AIartifact Options</title>
-
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f0f0f0;
+    }
+    h1 {
+      color: #333;
+      text-align: center;
+    }
+    .option {
+      background-color: white;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+    }
+    .option input[type="checkbox"] {
+      margin-right: 10px;
+    }
+  </style>
 </head>
 <body>
   <h1>AIartifact Options</h1>
-  <label>
+  <div class="option">
     <input type="checkbox" id="aiInputToggle">
-    Enable AI Input
-  </label>
-  <br>
-  <label>
+    <label for="aiInputToggle">Enable AI Input</label>
+  </div>
+  <div class="option">
     <input type="checkbox" id="aiArtifactToggle">
-    Enable AI Artifact
-  </label>
+    <label for="aiArtifactToggle">Enable AI Artifact</label>
+
+  </div>
+  <div class="option">
+    <input type="checkbox" id="aiArtifactbetaToggle">
+    <label for="aiArtifactbetaToggle">Enable AI Artifact Beta</label>
+
+  </div>
   <script src="options.js"></script>
 </body>
 </html>

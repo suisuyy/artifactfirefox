@@ -7,10 +7,24 @@ function cfetch(input, init = {}) {
       const formDataObject = {};
       formDataObject.bodyType = "form";
 
-      for (let [key, value] of body.entries()) {
-        formDataObject[key] = value;
+      let bodyIterator = body.entries();
+      let result = bodyIterator.next();
+
+      while (!result.done) {
+          let [key, value] = result.value;
+          formDataObject[key] = value;
+          result = bodyIterator.next();
+          //log key value
+        console.log(key, value);
       }
-      for (let [key, value] of body.entries()) {
+      bodyIterator = body.entries();
+      result = bodyIterator.next();
+      while (!result.done) {
+        let [key, value] = result.value;
+        result = bodyIterator.next();
+        console.log(key, value);
+
+
         if (value instanceof File) {
           formDataObject[key] = {
             name: value.name,

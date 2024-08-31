@@ -3,7 +3,7 @@
 chrome.action.onClicked.addListener((tab) => {
   chrome.scripting.executeScript({
     target: { tabId: tab.id },
-    files: ['cfetch.js', 'aiinput.js', 'aiartifact.js', 'content.js']
+    files: ['cfetch.js', 'aiinput.js', 'aiartifact.js', 'content.js','aiartifactbeta.js']
   });
 });
 
@@ -24,7 +24,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       let parsedBody = JSON.parse(body);
       if(!(parsedBody.bodyType==='form')){
         throw new Error("not form ");
-        
+
       }
       const formData = new FormData();
 
@@ -34,7 +34,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
           // Extract file information from the parsed JSON
           const fileInfo = value;
-  
+
           // Convert the base64 string to a Blob
           const byteCharacters = atob(fileInfo.data);
           const byteNumbers = new Array(byteCharacters.length);
@@ -43,13 +43,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           }
           const byteArray = new Uint8Array(byteNumbers);
           const blob = new Blob([byteArray], { type: fileInfo.type });
-  
+
           // Create a File object
           const file = new File([blob], fileInfo.name, {
             type: fileInfo.type,
             lastModified: fileInfo.lastModified
           });
-  
+
           // Append the file to the FormData object
           formData.append(key, file);
         }
@@ -66,12 +66,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         body=formData;
 
     });
-    
-    
-    
-    
+
+
+
+
       if (parsedBody.file?.data) {
-        
+
       }
     } catch (error) {
 
@@ -97,7 +97,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 chrome.runtime.onInstalled.addListener(() => {
   chrome.storage.sync.set({
     aiInputEnabled: false,
-    aiArtifactEnabled: true
+    aiArtifactEnabled: false,
+    aiArtifactbetaEnabled: true
   }, () => {
     console.log('Default settings initialized');
   });

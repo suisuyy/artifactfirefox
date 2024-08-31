@@ -4,7 +4,7 @@
   "main": " ",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "npx nodemon --exec \"cp *.js *.html *.css ./chrome\"  --ignore chrome    --watch ./ --ext js,html,css"
+    "dev": "npx nodemon --exec \"rm -rf chrome/*.js chrome/*.html chrome/*.css &&cp *.js *.html *.css *.png ./chrome && rm -rf dist/* && sleep 2 &&  zip -r dist/artifact_firefox.zip . && cd chrome && zip -r ../dist/artifact_chrome.zip . && cd .. \"  --ignore chrome --ignore dist --ignore *.zip    --watch ./ --ext js,html,css,json"
   },
   "author": "",
   "license": "ISC",

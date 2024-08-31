@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "AIartifact",
-  "version": "1.5",
+  "version": "2.0",
   "permissions": [
     "activeTab",
     "storage",
@@ -12,13 +12,13 @@
   "host_permissions": ["<all_urls>"],
   "options_page": "options.html",
   "background": {
-    //"scripts": ["background.js"], //for firefox
+    // "scripts": ["background.js"]
     "service_worker": "background.js"
   },
   "action": {
     "default_icon": "icon.png"
     // "default_popup": "popup.html"
-  },
+  }
   // "declarative_net_request": {
   //   "rule_resources": [
   //     {
@@ -28,9 +28,9 @@
   //     }
   //   ]
   // },
-  "browser_specific_settings": {
-    "gecko": {
-      "id": "woiceatus@gmail.com"
-    }
-  }
+  // ,"browser_specific_settings": {
+  //   "gecko": {
+  //     "id": "woiceatus@gmail.com"
+  //   }
+  // }
 }

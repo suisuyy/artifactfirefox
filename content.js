@@ -1,9 +1,10 @@
 async function getSettings() {
   return new Promise((resolve) => {
-    chrome.storage.sync.get(['aiInputEnabled', 'aiArtifactEnabled'], (result) => {
+    chrome.storage.sync.get(['aiInputEnabled', 'aiArtifactEnabled', 'aiArtifactbetaEnabled'], (result) => {
       resolve({
         aiInputEnabled: result?.aiInputEnabled ?? false,
-        aiArtifactEnabled: result?.aiArtifactEnabled ?? true
+        aiArtifactEnabled: result?.aiArtifactEnabled ?? false,
+        aiArtifactbetaEnabled: result?.aiArtifactbetaEnabled ?? false,
       });
     });
   });
@@ -12,12 +13,16 @@ async function getSettings() {
 async function init() {
   const settings = await getSettings();
 
-  if (settings.aiInputEnabled && typeof runAiInput === 'function') {
+  console.log('settings', settings);
+  if (settings.aiInputEnabled ) {
     runAiInput();
   }
 
-  if (settings.aiArtifactEnabled && typeof runAiArtifact === 'function') {
+  if (settings.aiArtifactEnabled ) {
     runAiArtifact();
+  }
+  if (settings.aiArtifactbetaEnabled) {
+    runAiArtifactbeta();
   }
 }
 
