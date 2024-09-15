@@ -1,29 +1,1037 @@
 function runAiInput() {
   console.log('aiinput running');
+  //redefine some standard functions
   let fetch = cfetch;
-  let apiURL='https://im1111-groqnote-dev.hf.space'
-var C={api_url:"",api_key:"",voice_button_id:"whisper_voice_button",transcribeProvider:"lepton_whisper",language:"",supportedInputTypeList:["text","number","tel","search","url","email"],buttonBackgroundColor:"lightblue",minimalRecordTime:2e3,keepButtonAliveInterval:0,isRecording:!1,llm_model_info:{url:apiURL+"/openai/v1/chat/completions",model:"llama3-70b-8192",max_tokens:8e3},zIndex:{highest:999999,higher:99999,high:9999,medium:999},apiKey:{flowgpt:""}};var s={Recorder:class{constructor(){this.isRecording=!1,this.mediaRecorder,this.encodeType="audio/mpeg",this.language="en",this.recordingColor="lightblue",this.autoStop=!0}async startRecording(e,t=()=>{console.log("silence detect")},l=!0){return e=e||document.querySelector("#whisper_voice_button"),this.stopRecording(),console.log("start recording"),navigator.mediaDevices.getUserMedia({audio:!0}).then(i=>{this.mediaRecorder=new MediaRecorder(i);let r=Date.now(),a=0,y=this.mediaRecorder,c=[];y.start(),this.isRecording=!0,e.style.backgroundColor="rgba(173, 216, 230, 0.3)";let d,p;p=new AudioContext;let b=p.createAnalyser();p.createMediaStreamSource(y.stream).connect(b),b.fftSize=512;let u=b.frequencyBinCount,m=new Uint8Array(u);return d=setInterval(()=>{b.getByteFrequencyData(m);let h=0;for(let f=0;f<u;f++)h+=m[f];let x=h/u;x<10?(a=Date.now()-r,a>1e3&&t()):r=Date.now();let D=3+x/15;e.style.transform=`scale(${D})`},100),y.addEventListener("dataavailable",h=>{console.log("dataavailable"),c.push(h.data)}),new Promise((h,x)=>{y.addEventListener("stop",async()=>{this.isRecording=!1,console.log("stop"),clearInterval(d);let D=new Blob(c,{type:this.encodeType});e.style.transform="scale(1)",e.style.background="transparent",p?.close(),y.stream.getTracks().forEach(f=>f.stop()),console.log("resolved "),h(D)})})}).catch(i=>{i.name==="PermissionDeniedError"||i.name==="NotAllowedError"?(console.error("User denied permission to access audio"),console.log("Audio permission denied")):console.error("An error occurred while accessing the audio device",i)})}async startRecordingWithSilenceDetection(e,t=()=>console.log("silence detect")){let l=this.autoStop||!0;return this.stopRecording(),console.log("start recording"),navigator.mediaDevices.getUserMedia({audio:!0}).then(i=>{this.mediaRecorder=new MediaRecorder(i);let r=Date.now(),a=!1,y=!0,c=Date.now(),d=0,p=this.mediaRecorder,b=[];p.start(),this.isRecording=!0,e.style.backgroundColor="rgba(173, 216, 230, 0.3)";let k,u;u=new AudioContext;let m=u.createAnalyser();u.createMediaStreamSource(p.stream).connect(m),m.fftSize=512;let h=m.frequencyBinCount,x=new Uint8Array(h);k=setInterval(()=>{m.getByteFrequencyData(x);let w=0;for(let S=0;S<h;S++)w+=x[S];let T=w/h;T<15?a?(d=Date.now()-c,d>3e3&&(y=!0,p.requestData(),c=Date.now())):(d=Date.now()-c,d>1e3&&(a=!0,console.log("change isSilent to true"),p.requestData())):(a=!1,y=!1,c=Date.now());let B=3+T/15;e.style.transform=`scale(${B})`},100);let f=0,v;return setTimeout(()=>{p.requestData()},200),p.addEventListener("dataavailable",w=>{if(l===!0&&Date.now()-r>1e4&&p.stop(),f++,f<=1){v=w.data,w.data.size>0&&b.push(w.data);return}if(console.log("dataavailable",w.data),y){console.log("dataavailable,Long silent will do noting",w.data);return}t(new Blob([v,w.data],{type:p.mimeType}))}),new Promise((w,T)=>{p.addEventListener("stop",async()=>{this.isRecording=!1,console.log("stop"),clearInterval(k);let B=new Blob(b,{type:this.encodeType});e.style.transform="scale(1)",e.style.background="transparent",u?.close(),p.stream.getTracks().forEach(S=>S.stop()),console.log("resolved "),w(B)})})}).catch(i=>{i.name==="PermissionDeniedError"||i.name==="NotAllowedError"?(console.error("User denied permission to access audio"),showNotification("Audio permission denied")):(console.error("An error occurred while accessing the audio device",i),showNotification("Error accessing audio device"))})}stopRecording(){this.isRecording=!1,this.mediaRecorder?.stop(),this.mediaRecorder?.audioContext?.close(),this.mediaRecorder?.stream?.getTracks().forEach(e=>e.stop())}},tts:function(e="test text",t="alloy"){let l=`https://im1111-free-get-tts.hf.space/tts/${encodeURIComponent(e)}`,i=document.getElementById("devlent_tts_container");i||(i=document.createElement("div"),i.id="devlent_tts_container",document.body.appendChild(i));let r=document.getElementById("tts_audio");if(!r){r=document.createElement("audio"),r.id="tts_audio",i.appendChild(r);let a=document.createElement("button");a.innerHTML="x",a.style.backgroundColor="transparent",a.style.marginLeft="10px",a.addEventListener("pointerdown",()=>i.style.display="none");let y=document.createElement("br");i.prepend(y),i.prepend(a)}i.style.display="block",i.style.position="fixed",i.style.top="20px",i.style.right="0",i.style.height="fit-content",e&&(r.src=l,r.controls=!0,r.autoplay=!0,s.dragElement(i,i))},stt:async o=>{let e=new FormData;e.append("file",o,"audio.mp3"),e.append("model","whisper-large-v3");try{let t=await fetch(apiURL+"/openai/v1/audio/transcriptions",{method:"POST",body:e});if(!t.ok)throw new Error(`Error: ${t.status} ${t.statusText}`);return await t.json()}catch(t){console.error("There was an error with the transcription request:",t)}},checkValidString(o){return!(o==null||o.trim()===""||o==="undefined"||o==="null")},getCurrentLineString(o){let t=window.getSelection().getRangeAt(0),l=t.startContainer,i=t.startOffset;if(l.nodeType===Node.TEXT_NODE){let c=l.textContent,d=c.lastIndexOf(`
-`,i)+1,p=c.indexOf(`
-`,i);return p===-1?c.slice(d):c.slice(d,p)}let r=document.createTreeWalker(o,NodeFilter.SHOW_TEXT),a,y="";for(;a=r.nextNode();){let d=a.textContent.split(`
-`);for(let p=0;p<d.length;p++)if(t.intersectsNode(a)){y=d[p];break}if(y!=="")break}return y},getCursorPosition(o){let e=0,t=o.ownerDocument||o.document,l=t.defaultView||t.parentWindow,i;if(typeof l.getSelection<"u"){if(i=l.getSelection(),i.rangeCount>0){let r=i.getRangeAt(0),a=r.cloneRange();a.selectNodeContents(o),a.setEnd(r.endContainer,r.endOffset),e=a.toString().length}}else if((i=t.selection)&&i.type!="Control"){let r=i.createRange(),a=t.body.createTextRange();a.moveToElementText(o),a.setEndPoint("EndToEnd",r),e=a.text.length}return console.log("caretOffset:",e),e},getCurrentBlock(o){o=o.parentElement;let e=this.getCursorPosition(o),t=o.innerText,l=t.indexOf(`
 
-`,e)+2;l===1&&(l=0);let i=t.lastIndexOf(`
+  //start of aiinput.js
+  let apiURL = 'https://im1111-groqnote-can.hf.space'
 
-`,e);return i===-1&&(i=t.length),t.substring(l,i).trim()},isEditableElement:function(e){for(;e;){if(e.contentEditable==="true")return!0;e=e.parentElement}return!1},disableSelect:function(e){e.style.userSelect="none",e.addEventListener("pointerdown",t=>{t.preventDefault()})},getSelectionText:function(){let e=document.activeElement;return e&&e.value?e.value.substring(e.selectionStart,e.selectionEnd):window.getSelection().toString()},makeButtonFeedback:function(e){let t=e.style.backgroundColor||"white";e.addEventListener("pointerdown",function(){e.style.backgroundColor="lightblue"}),e.addEventListener("pointerup",function(){setTimeout(()=>{e.style.backgroundColor=t},1e3)}),e.addEventListener("pointercancel",function(){setTimeout(()=>{e.style.backgroundColor=t},1e3)})},showToast:function(e,t=0,l=0,i=200,r=0,a=1e3,y=9999){let c=document.createElement("textarea");c.value=e,c.style.width=i+"px",c.style.height=r===0?"auto":r+"px",c.style.borderWidth="0",c.style.outline="none",c.style.position="fixed",c.style.left=t+"px",c.style.top=l+"px",c.style.zIndex=y,c.style.backgroundColor="black",c.style.color="white",c.disabled=!0,document.body.appendChild(c),setTimeout(()=>{document.body.removeChild(c)},a)},copyToClipboard:function(e){let t=document.createElement("textarea");t.value=e,t.style.width="50%",t.style.height="100px",t.style.borderWidth="0",t.style.outline="none",t.style.position="fixed",t.style.left="0",t.style.top="0",t.style.zIndex="9999999",t.style.backgroundColor="black",t.style.color="white",document.body.appendChild(t),t.select(),document.execCommand("copy"),t.disabled=!0,t.value=`copyed to clipboard 
-`+t.value,t.scrollTo(1e4,1e5),setTimeout(()=>{document.body.removeChild(t)},1e3)},writeText:function(e,t,l=" ",i=" "){console.log("writeText(): ",e),document.execCommand("insertText",!1,`${l}${t}${i}`)||s.copyToClipboard(t)},dragElement:function(e,t=e.parentElement,l=1){e.style.touchAction="none";let i=0,r=0,a=0,y=0,c,d;e.addEventListener("pointerdown",u=>{p(u)});function p(u){u=u||window.event,u.preventDefault(),a=u.clientX,y=u.clientY,document.body.addEventListener("pointermove",b),document.body.addEventListener("pointerup",k),d=document.querySelector("#shadeDivForDragElement")||document.createElement("div"),d.id="shadeDivForDragElement",d.style.width="300vw",d.style.height="300vh",d.style.position="fixed",d.style.top="0",d.style.left="0",d.style.backgroundColor="rgb(230,230,230,0.2)",d.style.zIndex=1e5,document.body.appendChild(d),c=setTimeout(()=>{let m=document.querySelector("#shadeDivForDragElement");m&&document.body.removeChild(m)},1e4)}function b(u){u=u||window.event,u.preventDefault(),i=a-u.clientX,r=y-u.clientY,t.style.position="fixed",t.style.top=u.clientY-e.clientHeight/2+"px",t.style.left=u.clientX-e.clientWidth/2+"px"}function k(){console.log("closeDragElement(): pointerup"),document.body.removeEventListener("pointermove",b),document.body.removeEventListener("pointerup",k),document.body.removeChild(document.querySelector("#shadeDivForDragElement"))}},renderMarkdown(o,e){let t=/^(#{1,6})\s*(.*)$/gm,l=/\*\*(.*?)\*\*/g,i=/\[(.*?)\]\((.*?)\)/g,r=/(?:\n)/g,a=/```(.*?)```/g,y=/```(\w+)?\n(.*?)```/gs,c=o,d=c.split("```");for(let n=0;n<d.length;n++)n%2===0&&(d[n]=d[n].replace(t,(I,R,_)=>{let M=R.length;return`<h${M}>${_}</h${M}>`}),d[n]=d[n].replace(r,(I,R,_)=>{let M=R.length;return"<br>"}));c=d.join("```"),c=c.replace(l,"<strong>$1</strong>"),c=c.replace(i,'<a href="$2">$1</a>'),c=c.replace(y,(n,I,R)=>`
+
+  // model.js
+  var appModel = {
+    api_url: "",
+    api_key: "",
+    voice_button_id: "whisper_voice_button",
+    transcribeProvider: "lepton_whisper",
+    language: "",
+    supportedInputTypeList: ["text", "number", "tel", "search", "url", "email"],
+    buttonBackgroundColor: "lightblue",
+    minimalRecordTime: 2e3,
+    keepButtonAliveInterval: 0,
+    isRecording: false,
+    llm_model_info: {
+      url: "/openai/v1/chat/completions",
+      model: "llama3-70b-8192",
+      max_tokens: 8e3
+    },
+    zIndex: {
+      highest: 999999,
+      higher: 99999,
+      high: 9999,
+      medium: 999
+    },
+    apiKey: {
+      "flowgpt": ""
+    }
+  };
+
+  // utils.js
+  var utils = {
+    Recorder: class Recorder {
+      constructor() {
+        this.isRecording = false;
+        this.mediaRecorder;
+        this.encodeType = "audio/mpeg";
+        this.language = "en";
+        this.recordingColor = "lightblue";
+        this.autoStop = true;
+      }
+      async startRecording(targetElement, silenceHandler = () => {
+        console.log("silence detect");
+      }, autoStop = true) {
+        targetElement = targetElement || document.querySelector(`#whisper_voice_button`);
+        this.stopRecording();
+        console.log("start recording");
+        return navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+          this.mediaRecorder = new MediaRecorder(stream);
+          let silenceStart = Date.now();
+          let silenceDuration = 0;
+          let mediaRecorder = this.mediaRecorder;
+          let audioChunks = [];
+          mediaRecorder.start();
+          this.isRecording = true;
+          targetElement.style.backgroundColor = "rgba(173, 216, 230, 0.3)";
+          let volumeInterval;
+          let audioContext;
+          audioContext = new AudioContext();
+          const analyser = audioContext.createAnalyser();
+          const microphone = audioContext.createMediaStreamSource(
+            mediaRecorder.stream
+          );
+          microphone.connect(analyser);
+          analyser.fftSize = 512;
+          const bufferLength = analyser.frequencyBinCount;
+          const dataArray = new Uint8Array(bufferLength);
+          const updateButtonFontSize = () => {
+            analyser.getByteFrequencyData(dataArray);
+            let sum = 0;
+            for (let i = 0; i < bufferLength; i++) {
+              sum += dataArray[i];
+            }
+            let averageVolume = sum / bufferLength;
+            if (averageVolume < 10) {
+              silenceDuration = Date.now() - silenceStart;
+              if (silenceDuration > 1e3) {
+                silenceHandler();
+              }
+            } else {
+              silenceStart = Date.now();
+            }
+            let scale = 3 + averageVolume / 15;
+            targetElement.style.transform = `scale(${scale})`;
+          };
+          volumeInterval = setInterval(updateButtonFontSize, 100);
+          mediaRecorder.addEventListener("dataavailable", (event) => {
+            console.log("dataavailable");
+            audioChunks.push(event.data);
+          });
+          return new Promise((resolve, reject) => {
+            mediaRecorder.addEventListener("stop", async () => {
+              this.isRecording = false;
+              console.log("stop");
+              clearInterval(volumeInterval);
+              const audioBlob = new Blob(audioChunks, {
+                type: this.encodeType
+              });
+              targetElement.style.transform = `scale(1)`;
+              targetElement.style.background = "transparent";
+              audioContext?.close();
+              mediaRecorder.stream.getTracks().forEach((track) => track.stop());
+              console.log("resolved ");
+              resolve(audioBlob);
+            });
+          });
+        }).catch((error) => {
+          if (error.name === "PermissionDeniedError" || error.name === "NotAllowedError") {
+            console.error("User denied permission to access audio");
+            console.log("Audio permission denied");
+          } else {
+            console.error(
+              "An error occurred while accessing the audio device",
+              error
+            );
+          }
+        });
+      }
+      async startRecordingWithSilenceDetection(targetElement, silenceHandler = () => console.log("silence detect")) {
+        let autoStop = this.autoStop || true;
+        this.stopRecording();
+        console.log("start recording");
+        return navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+          this.mediaRecorder = new MediaRecorder(stream);
+          let startTime = Date.now();
+          let isSilent = false;
+          let isLongSilent = true;
+          let silenceStart = Date.now();
+          let silenceDuration = 0;
+          let mediaRecorder = this.mediaRecorder;
+          let audioChunks = [];
+          mediaRecorder.start();
+          this.isRecording = true;
+          targetElement.style.backgroundColor = "rgba(173, 216, 230, 0.3)";
+          let volumeInterval;
+          let audioContext;
+          audioContext = new AudioContext();
+          const analyser = audioContext.createAnalyser();
+          const microphone = audioContext.createMediaStreamSource(
+            mediaRecorder.stream
+          );
+          microphone.connect(analyser);
+          analyser.fftSize = 512;
+          const bufferLength = analyser.frequencyBinCount;
+          const dataArray = new Uint8Array(bufferLength);
+          const handleAudioData = () => {
+            analyser.getByteFrequencyData(dataArray);
+            let sum = 0;
+            for (let i = 0; i < bufferLength; i++) {
+              sum += dataArray[i];
+            }
+            let averageVolume = sum / bufferLength;
+            if (averageVolume < 15) {
+              if (isSilent) {
+                silenceDuration = Date.now() - silenceStart;
+                if (silenceDuration > 3e3) {
+                  isLongSilent = true;
+                  mediaRecorder.requestData();
+                  silenceStart = Date.now();
+                }
+              } else {
+                silenceDuration = Date.now() - silenceStart;
+                if (silenceDuration > 1e3) {
+                  isSilent = true;
+                  console.log("change isSilent to true");
+                  mediaRecorder.requestData();
+                }
+              }
+            } else {
+              isSilent = false;
+              isLongSilent = false;
+              silenceStart = Date.now();
+            }
+            let scale = 3 + averageVolume / 15;
+            targetElement.style.transform = `scale(${scale})`;
+          };
+          volumeInterval = setInterval(handleAudioData, 100);
+          let counter = 0;
+          let firstdata;
+          setTimeout(() => {
+            mediaRecorder.requestData();
+          }, 200);
+          mediaRecorder.addEventListener("dataavailable", (event) => {
+            if (autoStop === true) {
+              if (Date.now() - startTime > 36e5) {
+                mediaRecorder.stop();
+              }
+            }
+            counter++;
+            if (counter <= 1) {
+              firstdata = event.data;
+              if (event.data.size > 0) {
+                audioChunks.push(event.data);
+              }
+              return;
+            }
+            console.log("dataavailable", event.data);
+            if (isLongSilent) {
+              console.log("dataavailable,Long silent will do noting", event.data);
+              return;
+            }
+            silenceHandler(new Blob([firstdata, event.data], { type: mediaRecorder.mimeType }));
+          });
+          return new Promise((resolve, reject) => {
+            mediaRecorder.addEventListener("stop", async () => {
+              this.isRecording = false;
+              console.log("stop");
+              clearInterval(volumeInterval);
+              const audioBlob = new Blob(audioChunks, {
+                type: this.encodeType
+              });
+              targetElement.style.transform = `scale(1)`;
+              targetElement.style.background = "transparent";
+              audioContext?.close();
+              mediaRecorder.stream.getTracks().forEach((track) => track.stop());
+              console.log("resolved ");
+              resolve(audioBlob);
+            });
+          });
+        }).catch((error) => {
+          if (error.name === "PermissionDeniedError" || error.name === "NotAllowedError") {
+            console.error("User denied permission to access audio");
+            showNotification("Audio permission denied");
+          } else {
+            console.error(
+              "An error occurred while accessing the audio device",
+              error
+            );
+            showNotification("Error accessing audio device");
+          }
+        });
+      }
+      stopRecording() {
+        this.isRecording = false;
+        this.mediaRecorder?.stop();
+        this.mediaRecorder?.audioContext?.close();
+        this.mediaRecorder?.stream?.getTracks().forEach((track) => track.stop());
+      }
+    },
+    tts: function synthesizeSpeech(text = "test text", voice = "alloy") {
+      let url = `https://im1111-free-get-tts.hf.space/tts/${encodeURIComponent(text)}`;
+      let container = document.getElementById("devlent_tts_container");
+      if (!container) {
+        container = document.createElement("div");
+        container.id = "devlent_tts_container";
+        document.body.appendChild(container);
+      }
+      let audio = document.getElementById("tts_audio");
+      if (!audio) {
+        audio = document.createElement("audio");
+        audio.id = "tts_audio";
+        container.appendChild(audio);
+        let button2 = document.createElement("button");
+        button2.innerHTML = "x";
+        button2.style.backgroundColor = "transparent";
+        button2.style.marginLeft = "10px";
+        button2.addEventListener("pointerdown", () => container.style.display = "none");
+        let br = document.createElement("br");
+        container.prepend(br);
+        container.prepend(button2);
+      }
+      container.style.display = "block";
+      container.style.position = "fixed";
+      container.style.top = "20px";
+      container.style.right = "0";
+      container.style.height = "fit-content";
+      if (!text) return;
+      audio.src = url;
+      audio.controls = true;
+      audio.autoplay = true;
+      utils.dragElement(container, container);
+    },
+    stt: async (audioBlob) => {
+      const formData = new FormData();
+      formData.append("file", audioBlob, "audio.mp3");
+      formData.append("model", "whisper-large-v3");
+      try {
+        const response = await fetch(apiURL+"/openai/v1/audio/transcriptions", {
+          method: "POST",
+          body: formData
+        });
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status} ${response.statusText}`);
+        }
+        const data = await response.json();
+        return data;
+      } catch (error) {
+        console.error("There was an error with the transcription request:", error);
+      }
+    },
+    checkValidString(str) {
+      if (str === void 0 || str === null || str.trim() === "") {
+        return false;
+      }
+      if (str === "undefined" || str === "null") {
+        return false;
+      }
+      return true;
+    },
+    getCurrentLineString(element) {
+      const selection = window.getSelection();
+      const range = selection.getRangeAt(0);
+      const node = range.startContainer;
+      const offset = range.startOffset;
+      if (node.nodeType === Node.TEXT_NODE) {
+        const text = node.textContent;
+        const lineStart = text.lastIndexOf("\n", offset) + 1;
+        const lineEnd = text.indexOf("\n", offset);
+        const line = lineEnd === -1 ? text.slice(lineStart) : text.slice(lineStart, lineEnd);
+        return line;
+      }
+      const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
+      let currentNode, currentLine = "";
+      while (currentNode = walker.nextNode()) {
+        const text = currentNode.textContent;
+        const lines = text.split("\n");
+        for (let i = 0; i < lines.length; i++) {
+          if (range.intersectsNode(currentNode)) {
+            currentLine = lines[i];
+            break;
+          }
+        }
+        if (currentLine !== "") {
+          break;
+        }
+      }
+      return currentLine;
+    },
+    getCursorPosition(element) {
+      let caretOffset = 0;
+      const doc = element.ownerDocument || element.document;
+      const win = doc.defaultView || doc.parentWindow;
+      let sel;
+      if (typeof win.getSelection != "undefined") {
+        sel = win.getSelection();
+        if (sel.rangeCount > 0) {
+          const range = sel.getRangeAt(0);
+          const preCaretRange = range.cloneRange();
+          preCaretRange.selectNodeContents(element);
+          preCaretRange.setEnd(range.endContainer, range.endOffset);
+          caretOffset = preCaretRange.toString().length;
+        }
+      } else if ((sel = doc.selection) && sel.type != "Control") {
+        const textRange = sel.createRange();
+        const preCaretTextRange = doc.body.createTextRange();
+        preCaretTextRange.moveToElementText(element);
+        preCaretTextRange.setEndPoint("EndToEnd", textRange);
+        caretOffset = preCaretTextRange.text.length;
+      }
+      console.log("caretOffset:", caretOffset);
+      return caretOffset;
+    },
+    getCurrentBlock(elem) {
+      elem = elem.parentElement;
+      const cursorPosition = this.getCursorPosition(elem);
+      const text = elem.innerText;
+      let blockStart = text.indexOf("\n\n", cursorPosition) + 2;
+      if (blockStart === 1) {
+        blockStart = 0;
+      }
+      let blockEnd = text.lastIndexOf("\n\n", cursorPosition);
+      if (blockEnd === -1) {
+        blockEnd = text.length;
+      }
+      return text.substring(blockStart, blockEnd).trim();
+    },
+    isEditableElement: function isEditableElement(element) {
+      while (element) {
+        if (element.contentEditable === "true") {
+          return true;
+        }
+        element = element.parentElement;
+      }
+      return false;
+    },
+    disableSelect: function disableSelect(element) {
+      element.style.userSelect = "none";
+      element.addEventListener("pointerdown", (e) => {
+        e.preventDefault();
+      });
+    },
+    getSelectionText: function getSelectionText() {
+      let activeElement = document.activeElement;
+      if (activeElement && activeElement.value) {
+        return activeElement.value.substring(
+          activeElement.selectionStart,
+          activeElement.selectionEnd
+        );
+      } else {
+        return window.getSelection().toString();
+      }
+    },
+    makeButtonFeedback: function makeButtonFeedback(button2) {
+      let originalColor = button2.style.backgroundColor || "white";
+      button2.addEventListener("pointerdown", function () {
+        button2.style.backgroundColor = "lightblue";
+      });
+      button2.addEventListener("pointerup", function () {
+        setTimeout(() => {
+          button2.style.backgroundColor = originalColor;
+        }, 1e3);
+      });
+      button2.addEventListener("pointercancel", function () {
+        setTimeout(() => {
+          button2.style.backgroundColor = originalColor;
+        }, 1e3);
+      });
+    },
+    showToast: function showToast(text, x = 0, y = 0, w = 200, h = 0, duration = 1e3, zIndex = 9999) {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.width = w + "px";
+      textArea.style.height = h === 0 ? "auto" : h + "px";
+      textArea.style.borderWidth = "0";
+      textArea.style.outline = "none";
+      textArea.style.position = "fixed";
+      textArea.style.left = x + "px";
+      textArea.style.top = y + "px";
+      textArea.style.zIndex = zIndex;
+      textArea.style.backgroundColor = "black";
+      textArea.style.color = "white";
+      textArea.disabled = true;
+      document.body.appendChild(textArea);
+      setTimeout(() => {
+        document.body.removeChild(textArea);
+      }, duration);
+    },
+    copyToClipboard: function copyToClipboard(text) {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.width = "50%";
+      textArea.style.height = "100px";
+      textArea.style.borderWidth = "0";
+      textArea.style.outline = "none";
+      textArea.style.position = "fixed";
+      textArea.style.left = "0";
+      textArea.style.top = "0";
+      textArea.style.zIndex = "9999999";
+      textArea.style.backgroundColor = "black";
+      textArea.style.color = "white";
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand("copy");
+      textArea.disabled = true;
+      textArea.value = "copyed to clipboard \n" + textArea.value;
+      textArea.scrollTo(1e4, 1e5);
+      setTimeout(() => {
+        document.body.removeChild(textArea);
+      }, 1e3);
+    },
+    writeText: function writeText(targetElement, text, prefix = " ", endfix = " ") {
+      console.log("writeText(): ", targetElement);
+      document.execCommand("insertText", false, `${prefix}${text}${endfix}`) || utils.copyToClipboard(text);
+    },
+    dragElement: function dragElement(elmnt, movableElmnt = elmnt.parentElement, speed = 1) {
+      elmnt.style.touchAction = "none";
+      let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+      let rmShadeTimeout;
+      let shadeDiv;
+      elmnt.addEventListener("pointerdown", (e) => {
+        dragMouseDown(e);
+      });
+      function dragMouseDown(e) {
+        e = e || window.event;
+        e.preventDefault();
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        document.body.addEventListener("pointermove", elementDrag);
+        document.body.addEventListener("pointerup", closeDragElement);
+        shadeDiv = document.querySelector("#shadeDivForDragElement") || document.createElement("div");
+        shadeDiv.id = "shadeDivForDragElement";
+        shadeDiv.style.width = "300vw";
+        shadeDiv.style.height = "300vh";
+        shadeDiv.style.position = "fixed";
+        shadeDiv.style.top = "0";
+        shadeDiv.style.left = "0";
+        shadeDiv.style.backgroundColor = "rgb(230,230,230,0.2)";
+        shadeDiv.style.zIndex = 1e5;
+        document.body.appendChild(shadeDiv);
+        rmShadeTimeout = setTimeout(() => {
+          let shadeDiv2 = document.querySelector("#shadeDivForDragElement");
+          shadeDiv2 && document.body.removeChild(shadeDiv2);
+        }, 1e4);
+      }
+      function elementDrag(e) {
+        e = e || window.event;
+        e.preventDefault();
+        pos1 = pos3 - e.clientX;
+        pos2 = pos4 - e.clientY;
+        movableElmnt.style.position = "fixed";
+        movableElmnt.style.top = e.clientY - elmnt.clientHeight / 2 + "px";
+        movableElmnt.style.left = e.clientX - elmnt.clientWidth / 2 + "px";
+      }
+      function closeDragElement() {
+        console.log("closeDragElement(): pointerup");
+        document.body.removeEventListener("pointermove", elementDrag);
+        document.body.removeEventListener("pointerup", closeDragElement);
+        document.body.removeChild(
+          document.querySelector("#shadeDivForDragElement")
+        );
+      }
+    },
+    renderMarkdown(mdString, targetElement) {
+      let headerPattern = /^(#{1,6})\s*(.*)$/gm;
+      const boldPattern = /\*\*(.*?)\*\*/g;
+      const linkPattern = /\[(.*?)\]\((.*?)\)/g;
+      const newlinePattern = /(?:\n)/g;
+      const inlineCodePattern = /```(.*?)```/g;
+      const codeBlockPattern = /```(\w+)?\n(.*?)```/gs;
+      let html = mdString;
+      let parts = html.split("```");
+      for (let i = 0; i < parts.length; i++) {
+        if (i % 2 === 0) {
+          parts[i] = parts[i].replace(headerPattern, (match, hash, content) => {
+            const level = hash.length;
+            return `<h${level}>${content}</h${level}>`;
+          });
+          parts[i] = parts[i].replace(newlinePattern, (match, hash, content) => {
+            const level = hash.length;
+            return `<br>`;
+          });
+        }
+      }
+      html = parts.join("```");
+      html = html.replace(boldPattern, "<strong>$1</strong>");
+      html = html.replace(linkPattern, '<a href="$2">$1</a>');
+      html = html.replace(codeBlockPattern, (match, language, code) => {
+        return `
           <div class="code-block">
               <button class="copy-code-btn">Copy</button>
               <button class="insert-code-btn">Insert</button>
-              <pre id='devilentCodePre'><xmp>${R}</xmp></pre>
+              <pre id='devilentCodePre'><xmp>${code}</xmp></pre>
           </div>
-      `),c=c.replace(a,"<code>$1</code>"),e.innerHTML=c,e.querySelectorAll(".code-block button").forEach(n=>{n.addEventListener("pointerdown",I=>{I.preventDefault();let R=n.parentElement.querySelector("pre").innerText;n.classList.contains("copy-code-btn")?s.copyToClipboard(R):n.classList.contains("insert-code-btn")&&(console.log("insert button down"),s.writeText(document.activeElement,R,"",""))})});let b=document.createElement("button");b.innerText="Copy",b.addEventListener("pointerdown",n=>{n.preventDefault(),n.stopPropagation(),s.copyToClipboard(o)});let k=document.createElement("button");k.innerText="Insert",k.addEventListener("pointerdown",n=>{n.preventDefault(),n.stopPropagation(),s.writeText(document.activeElement,o,"","")}),b.classList.add("copy-btn"),k.classList.add("insert-btn");let u=document.createElement("button");u.innerText="Edit",u.addEventListener("pointerdown",n=>{n.preventDefault(),e.isEditableElement?e.setAttribute("contenteditable","false"):e.setAttribute("contenteditable","true")}),u.classList.add("copy-btn");let m=document.createElement("button");m.innerText="Close",m.addEventListener("pointerdown",n=>{n.preventDefault(),e.remove()}),m.classList.add("copy-btn");let g=document.createElement("div");g.classList.add("button-container"),g.appendChild(b),g.appendChild(k),g.appendChild(m),g.appendChild(u);let h=e;g.style.width="100%",g.style.backgroundColor=h.style.backgroundColor,g.style.color="lighten("+g.style.backgroundColor+", 20%)",e.prepend(g),s.dragElement(g,e),e.classList.add("markdown-container");let x=document.getElementsByClassName("markdown-container");for(let n=0;n<x.length;n++)x[n].style.fontFamily="Arial, sans-serif",x[n].style.lineHeight="1.6",x[n].style.maxWidth="800px",x[n].style.margin="0 auto",x[n].style.padding="0px",x[n].style.backgroundColor="azure",x[n].style.overflow="auto",x[n].style.boxShadow="0px 0px 50px rgba(0, 0, 0, 0.4)";let D=document.getElementsByClassName("code-block");for(let n=0;n<D.length;n++)D[n].style.position="relative";let f=document.getElementsByClassName("insert-code-btn"),v=document.getElementsByClassName("copy-code-btn");for(let n=0;n<v.length;n++)v[n].style.top="0",v[n].style.position="absolute",v[n].style.right="0",v[n].style.margin="5px",v[n].style.padding="2px 5px",v[n].style.fontSize="12px",v[n].style.border="none",v[n].style.borderRadius="3px",v[n].style.backgroundColor="#007bff",v[n].style.color="white",v[n].style.cursor="pointer";for(let n=0;n<f.length;n++)f[n].style.position="absolute",f[n].style.top="0",f[n].style.right="50px",f[n].style.margin="5px",f[n].style.padding="2px 5px",f[n].style.fontSize="12px",f[n].style.border="none",f[n].style.borderRadius="3px",f[n].style.backgroundColor="#007bff",f[n].style.color="white",f[n].style.cursor="pointer";let w=document.getElementsByClassName("copy-btn"),T=document.getElementsByClassName("insert-btn");for(let n=0;n<w.length;n++)w[n].style.margin="5px",w[n].style.padding="2px 5px",w[n].style.fontSize="12px",w[n].style.border="none",w[n].style.borderRadius="3px",w[n].style.backgroundColor="#007bff",w[n].style.color="white",w[n].style.cursor="pointer";for(let n=0;n<T.length;n++)T[n].style.margin="5px",T[n].style.padding="2px 5px",T[n].style.fontSize="12px",T[n].style.border="none",T[n].style.borderRadius="3px",T[n].style.backgroundColor="#007bff",T[n].style.color="white",T[n].style.cursor="pointer";let B=e.getElementsByTagName("pre");for(let n=0;n<B.length;n++)B[n].style.backgroundColor="#f7f7f7",B[n].style.borderRadius="5px",B[n].style.padding="10px",B[n].style.whiteSpace="pre-wrap",B[n].style.wordBreak="break-all";let S=e.getElementsByTagName("code");for(let n=0;n<S.length;n++)S[n].style.backgroundColor="#f1f1f1",S[n].style.borderRadius="3px",S[n].style.padding="2px 5px",S[n].style.fontFamily="'Courier New', Courier, monospace"},displayMarkdown(o){let e="ai_input_md_dispalyer",t=document.getElementById(e);t===null&&(t=document.getElementById(e)||document.createElement("div"),t.id=e,document.body.appendChild(t),t.style.zIndex="100000",t.style.position="fixed",t.style.top="70vh",t.style.left="0",t.style.height="40vh",t.style.width="80vw",t.style.backgroundColor="rgba{20,20,50,1}"),s.renderMarkdown(o,t);let l=document.createElement("div");l.style.height="3000px",t.appendChild(l)},moveElementNearMouse:(o,e,t=!0,l)=>{let i=l.clientX+200,r=l.clientY-20;console.log("moveElementNearMouse: ",i,r),t&&(i=Math.abs(i),r=Math.abs(r),i=Math.min(i,window.innerWidth-o.clientWidth),r=Math.min(r,window.innerHeight-10-o.clientHeight)),o.style.left=i+"px",o.style.top=r+"px"},addEventListenerForActualClick(o,e){let t,l,i;o.addEventListener("pointerdown",r=>{t=r.clientX,l=r.clientY,i=Date.now()}),o.addEventListener("pointerup",r=>{let a=Math.abs(r.clientX-t),y=Math.abs(r.clientY-l);a<=10&&y<=10&&Date.now()-i<1e3&&(console.log("Minimal mouse movement (< 10px in either direction) and short duration click detected."),e(r))})},sendKeyEvent(o,e,t){let l=new KeyboardEvent("keydown",{key:e,code:e.toUpperCase(),bubbles:!0,cancelable:!0,...t}),i=new KeyboardEvent("keyup",{key:e,code:e.toUpperCase(),bubbles:!0,cancelable:!0,...t});o.dispatchEvent(l),o.dispatchEvent(i)},blobToBase64:function(e){if(!(e instanceof Blob))throw new TypeError("Parameter must be a Blob object.");if(!e.size)throw new Error("Empty Blob provided.");return new Promise((t,l)=>{let i=new FileReader;i.onload=()=>t(i.result.split(",")[1]),i.onerror=l,i.readAsDataURL(e)})},playAudioBlob:function(e,t=!0){let l=new Audio;l.src=URL.createObjectURL(e),l.controls=!0,document.body.prepend(l),t===!0&&l.play().then(()=>{console.log("Audio played successfully!")}).catch(i=>{console.error("Error playing audio:",i)})},async AIComplete(o,e={url:apiURL+"/openai/v1/chat/completions",model:"llama3-70b-8192",max_tokens:8e3}){if(console.log("AIcomplete(): ",o),s.checkValidString(o)===!1)return;let t=await fetch(e.url,{headers:{accept:"*/*","content-type":"application/json"},body:JSON.stringify({messages:[{role:"system",content:"be concise and clear."},{role:"user",content:o}],model:e.model,tools:[],temperature:.7,top_p:.8,max_tokens:e.max_tokens||1e6}),method:"POST"});t=await t.json();let l=t?.choices[0]?.message?.content;console.log("[leptonComplete(text)]",l);let i=document.createElement("div");return document.body.appendChild(i),s.displayMarkdown(o+`
+      `;
+      });
+      html = html.replace(inlineCodePattern, "<code>$1</code>");
+      targetElement.innerHTML = html;
+      const buttons = targetElement.querySelectorAll(".code-block button");
+      buttons.forEach((btn) => {
+        btn.addEventListener("pointerdown", (e) => {
+          e.preventDefault();
+          const code = btn.parentElement.querySelector("pre").innerText;
+          if (btn.classList.contains("copy-code-btn")) {
+            utils.copyToClipboard(code);
+          } else if (btn.classList.contains("insert-code-btn")) {
+            console.log("insert button down");
+            utils.writeText(document.activeElement, code, "", "");
+          }
+        });
+      });
+      const copyButton = document.createElement("button");
+      copyButton.innerText = "Copy";
+      copyButton.addEventListener("pointerdown", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        utils.copyToClipboard(mdString);
+      });
+      const insertButton = document.createElement("button");
+      insertButton.innerText = "Insert";
+      insertButton.addEventListener("pointerdown", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        utils.writeText(document.activeElement, mdString, "", "");
+      });
+      copyButton.classList.add("copy-btn");
+      insertButton.classList.add("insert-btn");
+      let editButton = document.createElement("button");
+      editButton.innerText = "Edit";
+      editButton.addEventListener("pointerdown", (e) => {
+        e.preventDefault();
+        if (targetElement.isEditableElement) {
+          targetElement.setAttribute("contenteditable", "false");
+        } else {
+          targetElement.setAttribute("contenteditable", "true");
+        }
+      });
+      editButton.classList.add("copy-btn");
+      const closeButton = document.createElement("button");
+      closeButton.innerText = "Close";
+      closeButton.addEventListener("pointerdown", (e) => {
+        e.preventDefault();
+        targetElement.remove();
+      });
+      closeButton.classList.add("copy-btn");
+      let buttonContainer = document.createElement("div");
+      buttonContainer.classList.add("button-container");
+      buttonContainer.appendChild(copyButton);
+      buttonContainer.appendChild(insertButton);
+      buttonContainer.appendChild(closeButton);
+      buttonContainer.appendChild(editButton);
+      const parentElement = targetElement;
+      buttonContainer.style.width = "100%";
+      buttonContainer.style.backgroundColor = parentElement.style.backgroundColor;
+      buttonContainer.style.color = "lighten(" + buttonContainer.style.backgroundColor + ", 20%)";
+      targetElement.prepend(buttonContainer);
+      utils.dragElement(buttonContainer, targetElement);
+      targetElement.classList.add("markdown-container");
+      let markdownContainers = document.getElementsByClassName("markdown-container");
+      for (let i = 0; i < markdownContainers.length; i++) {
+        markdownContainers[i].style.fontFamily = "Arial, sans-serif";
+        markdownContainers[i].style.lineHeight = "1.6";
+        markdownContainers[i].style.maxWidth = "800px";
+        markdownContainers[i].style.margin = "0 auto";
+        markdownContainers[i].style.padding = "0px";
+        markdownContainers[i].style.backgroundColor = "azure";
+        markdownContainers[i].style.overflow = "auto";
+        markdownContainers[i].style.boxShadow = "0px 0px 50px rgba(0, 0, 0, 0.4)";
+      }
+      let codeBlocks = document.getElementsByClassName("code-block");
+      for (let i = 0; i < codeBlocks.length; i++) {
+        codeBlocks[i].style.position = "relative";
+      }
+      let insertCodeBtns = document.getElementsByClassName("insert-code-btn");
+      let codecopyBtns = document.getElementsByClassName("copy-code-btn");
+      for (let i = 0; i < codecopyBtns.length; i++) {
+        codecopyBtns[i].style.top = "0";
+        codecopyBtns[i].style.position = "absolute";
+        codecopyBtns[i].style.right = "0";
+        codecopyBtns[i].style.margin = "5px";
+        codecopyBtns[i].style.padding = "2px 5px";
+        codecopyBtns[i].style.fontSize = "12px";
+        codecopyBtns[i].style.border = "none";
+        codecopyBtns[i].style.borderRadius = "3px";
+        codecopyBtns[i].style.backgroundColor = "#007bff";
+        codecopyBtns[i].style.color = "white";
+        codecopyBtns[i].style.cursor = "pointer";
+      }
+      for (let i = 0; i < insertCodeBtns.length; i++) {
+        insertCodeBtns[i].style.position = "absolute";
+        insertCodeBtns[i].style.top = "0";
+        insertCodeBtns[i].style.right = "50px";
+        insertCodeBtns[i].style.margin = "5px";
+        insertCodeBtns[i].style.padding = "2px 5px";
+        insertCodeBtns[i].style.fontSize = "12px";
+        insertCodeBtns[i].style.border = "none";
+        insertCodeBtns[i].style.borderRadius = "3px";
+        insertCodeBtns[i].style.backgroundColor = "#007bff";
+        insertCodeBtns[i].style.color = "white";
+        insertCodeBtns[i].style.cursor = "pointer";
+      }
+      let copyBtns = document.getElementsByClassName("copy-btn");
+      let insertBtns = document.getElementsByClassName("insert-btn");
+      for (let i = 0; i < copyBtns.length; i++) {
+        copyBtns[i].style.margin = "5px";
+        copyBtns[i].style.padding = "2px 5px";
+        copyBtns[i].style.fontSize = "12px";
+        copyBtns[i].style.border = "none";
+        copyBtns[i].style.borderRadius = "3px";
+        copyBtns[i].style.backgroundColor = "#007bff";
+        copyBtns[i].style.color = "white";
+        copyBtns[i].style.cursor = "pointer";
+      }
+      for (let i = 0; i < insertBtns.length; i++) {
+        insertBtns[i].style.margin = "5px";
+        insertBtns[i].style.padding = "2px 5px";
+        insertBtns[i].style.fontSize = "12px";
+        insertBtns[i].style.border = "none";
+        insertBtns[i].style.borderRadius = "3px";
+        insertBtns[i].style.backgroundColor = "#007bff";
+        insertBtns[i].style.color = "white";
+        insertBtns[i].style.cursor = "pointer";
+      }
+      let pres = targetElement.getElementsByTagName("pre");
+      for (let i = 0; i < pres.length; i++) {
+        pres[i].style.backgroundColor = "#f7f7f7";
+        pres[i].style.borderRadius = "5px";
+        pres[i].style.padding = "10px";
+        pres[i].style.whiteSpace = "pre-wrap";
+        pres[i].style.wordBreak = "break-all";
+      }
+      let codes = targetElement.getElementsByTagName("code");
+      for (let i = 0; i < codes.length; i++) {
+        codes[i].style.backgroundColor = "#f1f1f1";
+        codes[i].style.borderRadius = "3px";
+        codes[i].style.padding = "2px 5px";
+        codes[i].style.fontFamily = "'Courier New', Courier, monospace";
+      }
+    },
+    displayMarkdown(mdString) {
+      let containerID = "ai_input_md_dispalyer";
+      let container = document.getElementById(containerID);
+      if (container === null) {
+        container = document.getElementById(containerID) || document.createElement("div");
+        container.id = containerID;
+        document.body.appendChild(container);
+        container.style.zIndex = "100000";
+        container.style.position = "fixed";
+        container.style.top = "70vh";
+        container.style.left = "0";
+        container.style.height = "40vh";
+        container.style.width = "80vw";
+        container.style.backgroundColor = "rgba{20,20,50,1}";
+      }
+      utils.renderMarkdown(mdString, container);
+      let div = document.createElement("div");
+      div.style.height = "3000px";
+      container.appendChild(div);
+    },
+    moveElementNearMouse: (mElem, targetElement, alwayInWindow = true, event) => {
+      let x = event.clientX + 200;
+      let y = event.clientY - 20;
+      console.log("moveElementNearMouse: ", x, y);
+      if (alwayInWindow) {
+        x = Math.abs(x);
+        y = Math.abs(y);
+        x = Math.min(x, window.innerWidth - mElem.clientWidth);
+        y = Math.min(y, window.innerHeight - 10 - mElem.clientHeight);
+      }
+      mElem.style.left = x + "px";
+      mElem.style.top = y + "px";
+    },
+    addEventListenerForActualClick(element, handler) {
+      let initialX, initialY;
+      let startTime;
+      element.addEventListener("pointerdown", (event) => {
+        initialX = event.clientX;
+        initialY = event.clientY;
+        startTime = Date.now();
+      });
+      element.addEventListener("pointerup", (event) => {
+        const deltaX = Math.abs(event.clientX - initialX);
+        const deltaY = Math.abs(event.clientY - initialY);
+        if (deltaX <= 10 && deltaY <= 10 && Date.now() - startTime < 1e3) {
+          console.log(
+            "Minimal mouse movement (< 10px in either direction) and short duration click detected."
+          );
+          handler(event);
+        }
+      });
+    },
+    sendKeyEvent(element, key, modifiers) {
+      const eventDown = new KeyboardEvent("keydown", {
+        key,
+        code: key.toUpperCase(),
+        bubbles: true,
+        cancelable: true,
+        ...modifiers
+      });
+      const eventUp = new KeyboardEvent("keyup", {
+        key,
+        code: key.toUpperCase(),
+        bubbles: true,
+        cancelable: true,
+        ...modifiers
+      });
+      element.dispatchEvent(eventDown);
+      element.dispatchEvent(eventUp);
+    },
+    blobToBase64: function blobToBase64(blob) {
+      if (!(blob instanceof Blob)) {
+        throw new TypeError("Parameter must be a Blob object.");
+      }
+      if (!blob.size) {
+        throw new Error("Empty Blob provided.");
+      }
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(",")[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    },
+    playAudioBlob: function playAudioBlob(blob, autoPlay = true) {
+      const audio = new Audio();
+      audio.src = URL.createObjectURL(blob);
+      audio.controls = true;
+      document.body.prepend(audio);
+      if (autoPlay === true) {
+        audio.play().then(() => {
+          console.log("Audio played successfully!");
+        }).catch((error) => {
+          console.error("Error playing audio:", error);
+        });
+      }
+    },
+    async AIComplete(userText, option = {
+      url: apiURL+"/openai/v1/chat/completions",
+      model: "llama3-70b-8192",
+      max_tokens: 8e3
+    }) {
+      console.log("AIcomplete(): ", userText);
+      if (utils.checkValidString(userText) === false) {
+        return;
+      }
+      let response = await fetch(
+        option.url,
+        {
+          headers: {
+            accept: "*/*",
+            "content-type": "application/json"
+          },
+          body: JSON.stringify({
+            messages: [
+              {
+                "role": "system",
+                "content": "be concise and clear."
+              },
+              { role: "user", content: userText }
+            ],
+            model: option.model,
+            tools: [],
+            temperature: 0.7,
+            top_p: 0.8,
+            max_tokens: option.max_tokens || 1e6
+          }),
+          method: "POST"
+        }
+      );
+      response = await response.json();
+      let responseMessage = response?.choices[0]?.message?.content;
+      console.log("[leptonComplete(text)]", responseMessage);
+      let mdContainer = document.createElement("div");
+      document.body.appendChild(mdContainer);
+      utils.displayMarkdown(userText + "\n\n" + option.model + "\n" + responseMessage);
+      return response;
+    }
+  };
 
-`+e.model+`
-`+l),t}};var L={async handleRecording(o){let e=Date.now(),t=await E.recorder.startRecording(E.elem.voiceButton);if(Date.now()-e<C.minimalRecordTime){s.showToast("time too short, this will not transcribe");return}let l=await s.stt(t);l.text||(console.log("transcribe failed, try alternative way"),l=await whisperjaxws(t)),s.writeText(document.activeElement,l.text)},async startRecordingWithSilenceDetection(o){let e=Date.now(),t=await E.recorder.startRecordingWithSilenceDetection(E.elem.voiceButton,i=>{s.stt(i).then(r=>{r?.text?s.writeText(document.activeElement,r.text):(console.log("transcribe failed, try alternative way"),whisperjaxws(i).then(a=>{s.writeText(document.activeElement,a)}))})});if(Date.now()-e<C.minimalRecordTime){s.showToast("time too short, this will not transcribe");return}let l=await s.sendAudioToLeptonWhisperApi(t);l||(console.log("transcribe failed, try alternative way"),l=await whisperjaxws(t)),s.writeText(document.activeElement,l.text)},stopRecording(o=!0){C.isRecording=!1,o?setTimeout(()=>{console.log("safeStop"),E.recorder.stopRecording()},500):E.recorder.stopRecording()},async chat(o){let e=window.getSelection().toString(),t=s.getCurrentLineString(document.activeElement);prompt=`${o} ${e.length>=1?e:t} `;let l=prompt;if(!s.checkValidString(l)){console.log("chat(): invalid userText:",l);return}s.displayMarkdown(l+` 
- please wait`),s.AIComplete(l,C.llm_model_info)},async ask(){if(C.isRecording){s.AIComplete(s.getSelectionText(),C.llm_model_info);return}let o=Date.now(),e=await E.recorder.startRecording(E.elem.voiceButton);if(Date.now()-o<C.minimalRecordTime){s.showToast("time too short, this will not transcribe"),console.log("ask():",s.getSelectionText()),s.AIComplete(s.getSelectionText(),C.llm_model_info);return}let t=await s.stt(e);t||(console.log("transcribe failed, try alternative way"),t=await whisperjaxws(e));let l=window.getSelection().toString(),i=s.checkValidString(l)?`"${l}" ${t.text}`:t.text;if(!s.checkValidString(i)){console.log("ask(): invalid userText:",i);return}s.displayMarkdown(i+" please wait"),s.AIComplete(i)}};var E={elem:{currentInputElem:null,voiceButton:null},recorder:null,async init(){this.recorder=new s.Recorder,this.elem.voiceButton=this.createButton(),C.keepButtonAliveInterval=setInterval(()=>{document.getElementById("whisper_voice_button")||this.createButton()},2e3)},createButton(){if(document.getElementById("whisper_voice_button"))return;let o=document.createElement("button");return this.elem.voiceButton=o,o.id=C.voice_button_id,o.innerText="\u25EF",o.type="button",o.classList.add("speech-to-text-button"),o.style.top=window.innerHeight-100+"px",o.style.left="0",o.style.width="40px",o.style.height=o.style.width,o.style.fontSize="30px",o.style.padding="0",o.style.border="0px",o.style.color="blue",o.style.background="transparent",o.style.zIndex=1e6,o.style.position="fixed",o.style.borderRadius="50%",o.style.userSelect="none",o.style.touchAction="none",document.body.appendChild(o),s.dragElement(o,o),o.addEventListener("click",()=>{console.log("createButton():clicked")}),o.addEventListener("pointerdown",async e=>{e.preventDefault(),L.handleRecording(e)}),o.addEventListener("pointerup",()=>{console.log("createButton pointerup"),L.stopRecording()}),s.addEventListenerForActualClick(o,e=>{let t=e?.clientX,l=e?.clientY;this.createMenu(t+50,l+50)}),s.addEventListenerForActualClick(document.body,e=>{E.recorder.isRecording||(e.target.tagName==="INPUT"&&C.supportedInputTypeList.includes(e.target.type)?s.moveElementNearMouse(o,e.target,!0,e):(e.target.tagName==="TEXTAREA"||s.isEditableElement(e.target))&&s.moveElementNearMouse(o,e.target,!0,e))}),window.addEventListener("resize",()=>{let e=o.getBoundingClientRect();e.top>window.innerHeight-e.height&&(o.style.top=window.innerHeight-e.height+"px")}),o},createMenu(o,e,t="webai_input_menu"){let l=window.innerWidth,i=window.innerHeight,r=document.getElementById(t);if(r){r.style.left=Math.min(o,l-r.offsetWidth*.5)+"px",r.style.top=Math.min(e,i-r.offsetHeight)-100+"px",r.style.zIndex="99999";return}r=document.createElement("div"),document.body.appendChild(r),r.id=t,r.style.zIndex="99999",r.style.position="fixed",r.style.backgroundColor="white",r.style.boxShadow="0 2px 5px rgba(0, 0, 0, 0.1)",r.style.borderRadius="4px",r.style.display="flex",r.style.flexDirection="column",r.style.alignItems="flex-start",r.style.padding="10px",r.style.left=Math.min(o,l-r.offsetWidth)+"px",r.style.top=Math.min(e,i-r.offsetHeight)-100+"px",r.style.opacity="0.7",s.disableSelect(r),r.style.maxHeight="60vh",r.style.overflowY="auto",r.style.cssText+=`
+  // controller.js
+  var controller = {
+    async handleRecording(event) {
+      let startTime = Date.now();
+      let audioblob = await view.recorder.startRecording(view.elem.voiceButton);
+      if (Date.now() - startTime < appModel.minimalRecordTime) {
+        utils.showToast("time too short, this will not transcribe");
+        return;
+      }
+      let transcribe = await utils.stt(audioblob);
+      if (!transcribe.text) {
+        console.log("transcribe failed, try alternative way");
+        transcribe = await whisperjaxws(audioblob);
+      }
+      utils.writeText(document.activeElement, transcribe.text);
+    },
+    async startRecordingWithSilenceDetection(event) {
+      let startTime = Date.now();
+      let finalAudioblob = await view.recorder.startRecordingWithSilenceDetection(
+        view.elem.voiceButton,
+        (audioBlob) => {
+          utils.stt(audioBlob).then((transcribe2) => {
+            if (!transcribe2?.text) {
+              console.log("transcribe failed, try alternative way");
+              whisperjaxws(audioBlob).then((transcribe3) => {
+                utils.writeText(document.activeElement, transcribe3);
+              });
+            } else {
+              utils.writeText(document.activeElement, transcribe2.text);
+            }
+          });
+        }
+      );
+      if (Date.now() - startTime < appModel.minimalRecordTime) {
+        utils.showToast("time too short, this will not transcribe");
+        return;
+      }
+      let transcribe = await utils.stt(finalAudioblob);
+      if (!transcribe) {
+        console.log("transcribe failed, try alternative way");
+        transcribe = await whisperjaxws(finalAudioblob);
+      }
+      utils.writeText(document.activeElement, transcribe.text);
+    },
+    stopRecording(safeStop = true) {
+      appModel.isRecording = false;
+      if (safeStop) {
+        setTimeout(() => {
+          console.log("safeStop");
+          view.recorder.stopRecording();
+        }, 500);
+      } else {
+        view.recorder.stopRecording();
+      }
+    },
+    async chat(message) {
+      let selectText = window.getSelection().toString();
+      let currentLineString = utils.getCurrentLineString(document.activeElement);
+      prompt = `${message} ${selectText.length >= 1 ? selectText : currentLineString} `;
+      let userText = prompt;
+      if (!utils.checkValidString(userText)) {
+        console.log("chat(): invalid userText:", userText);
+        return;
+      }
+      utils.displayMarkdown(userText + " \n please wait");
+      utils.AIComplete(userText, appModel.llm_model_info);
+    },
+    async ask() {
+      if (appModel.isRecording) {
+        utils.AIComplete(utils.getSelectionText(), appModel.llm_model_info);
+        return;
+      }
+      let startTime = Date.now();
+      let audioblob = await view.recorder.startRecording(view.elem.voiceButton);
+      if (Date.now() - startTime < appModel.minimalRecordTime) {
+        utils.showToast("time too short, this will not transcribe");
+        console.log("ask():", utils.getSelectionText());
+        utils.AIComplete(utils.getSelectionText(), appModel.llm_model_info);
+        return;
+      }
+      let transcribe = await utils.stt(audioblob);
+      if (!transcribe) {
+        console.log("transcribe failed, try alternative way");
+        transcribe = await whisperjaxws(audioblob);
+      }
+      let selectionString = window.getSelection().toString();
+      let userText = utils.checkValidString(selectionString) ? `"${selectionString}" ${transcribe.text}` : transcribe.text;
+      if (!utils.checkValidString(userText)) {
+        console.log("ask(): invalid userText:", userText);
+        return;
+      }
+      utils.displayMarkdown(userText + " please wait");
+      utils.AIComplete(userText);
+    }
+  };
+
+  // view.js
+  var view = {
+    elem: {
+      currentInputElem: null,
+      voiceButton: null
+    },
+    recorder: null,
+    async init() {
+      this.recorder = new utils.Recorder();
+      this.elem.voiceButton = this.createButton();
+      appModel.keepButtonAliveInterval = setInterval(() => {
+        const whisperButton = document.getElementById("whisper_voice_button");
+        if (!whisperButton) {
+          this.createButton();
+        }
+      }, 2e3);
+    },
+    createButton() {
+      if (document.getElementById("whisper_voice_button")) {
+        return;
+      }
+      let button2 = document.createElement("button");
+      this.elem.voiceButton = button2;
+      button2.id = appModel.voice_button_id;
+      button2.innerText = "\u25EF";
+      button2.type = "button";
+      button2.classList.add("speech-to-text-button");
+      button2.style.top = window.innerHeight - 100 + "px";
+      button2.style.left = "0";
+      button2.style.width = "40px";
+      button2.style.height = button2.style.width;
+      button2.style.fontSize = "30px";
+      button2.style.padding = "0";
+      button2.style.border = "0px";
+      button2.style.color = "blue";
+      button2.style.background = "transparent";
+      button2.style.zIndex = 1e6;
+      button2.style.position = "fixed";
+      button2.style.borderRadius = "50%";
+      button2.style.userSelect = "none";
+      button2.style.touchAction = "none";
+      document.body.appendChild(button2);
+      utils.dragElement(button2, button2);
+      button2.addEventListener("click", () => {
+        console.log("createButton():clicked");
+      });
+      button2.addEventListener("pointerdown", async (event) => {
+        event.preventDefault();
+        controller.handleRecording(event);
+      });
+      button2.addEventListener("pointerup", () => {
+        console.log("createButton pointerup");
+        controller.stopRecording();
+      });
+      utils.addEventListenerForActualClick(button2, (event) => {
+        let clientX = event?.clientX;
+        let clientY = event?.clientY;
+        this.createMenu(clientX + 50, clientY + 50);
+      });
+      utils.addEventListenerForActualClick(document.body, (event) => {
+        if (view.recorder.isRecording) return;
+        if (event.target.tagName === "INPUT" && appModel.supportedInputTypeList.includes(event.target.type)) {
+          utils.moveElementNearMouse(button2, event.target, true, event);
+        } else if (event.target.tagName === "TEXTAREA" || utils.isEditableElement(event.target)) {
+          utils.moveElementNearMouse(button2, event.target, true, event);
+        }
+      });
+      window.addEventListener("resize", () => {
+        let buttonPos = button2.getBoundingClientRect();
+        if (buttonPos.top > window.innerHeight - buttonPos.height) {
+          button2.style.top = window.innerHeight - buttonPos.height + "px";
+        }
+      });
+      return button2;
+    },
+    createMenu(x, y, id = "webai_input_menu") {
+      const windowWidth = window.innerWidth;
+      const windowHeight = window.innerHeight;
+      let menuContainer = document.getElementById(id);
+      if (menuContainer) {
+        menuContainer.style.left = Math.min(x, windowWidth - menuContainer.offsetWidth * 0.5) + "px";
+        menuContainer.style.top = Math.min(y, windowHeight - menuContainer.offsetHeight) - 100 + "px";
+        menuContainer.style.zIndex = "99999";
+        return;
+      }
+      menuContainer = document.createElement("div");
+      document.body.appendChild(menuContainer);
+      menuContainer.id = id;
+      menuContainer.style.zIndex = "99999";
+      menuContainer.style.position = "fixed";
+      menuContainer.style.backgroundColor = "white";
+      menuContainer.style.boxShadow = "0 2px 5px rgba(0, 0, 0, 0.1)";
+      menuContainer.style.borderRadius = "4px";
+      menuContainer.style.display = "flex";
+      menuContainer.style.flexDirection = "column";
+      menuContainer.style.alignItems = "flex-start";
+      menuContainer.style.padding = "10px";
+      menuContainer.style.left = Math.min(x, windowWidth - menuContainer.offsetWidth) + "px";
+      menuContainer.style.top = Math.min(y, windowHeight - menuContainer.offsetHeight) - 100 + "px";
+      menuContainer.style.opacity = "0.7";
+      utils.disableSelect(menuContainer);
+      menuContainer.style.maxHeight = "60vh";
+      menuContainer.style.overflowY = "auto";
+      menuContainer.style.cssText += `
       scrollbar-width: thin; 
       scrollbar-color: rgba(0, 0, 0, 0.3) transparent; 
-    `,r.style.msOverflowStyle="none";function a(m,g){let h=document.createElement("button");return s.makeButtonFeedback(h),r.appendChild(h),h.style.cssText=`
+    `;
+      menuContainer.style.msOverflowStyle = "none";
+      function createMenuItem(textContent, handler) {
+        const menuItem = document.createElement("button");
+        utils.makeButtonFeedback(menuItem);
+        menuContainer.appendChild(menuItem);
+        menuItem.style.cssText = `
         background-color: white;
         border: none;
         font-size: 14px;
@@ -39,12 +1047,156 @@ var C={api_url:"",api_key:"",voice_button_id:"whisper_voice_button",transcribePr
         align-items: center;
         justify-content: flex-start;
         border-radius: 4px;
-      `,h.textContent=m,h.addEventListener("pointerdown",x=>{x.preventDefault(),g&&g()}),h}let y=a("Remove Menu");y.addEventListener("pointerdown",()=>r.remove()),r.appendChild(y);let c=a("Close");c.addEventListener("pointerdown",()=>{confirm("remove the AI tool now?")&&(clearInterval(C.keepButtonAliveInterval),E.elem.voiceButton.remove(),r.remove())}),r.appendChild(c),a("TTS",()=>{let m=s.getCurrentLineString(document.activeElement),g=window.getSelection().toString(),h=g.length>=1?g:m;s.tts(h,"de-DE-SeraphinaMultilingualNeural")});let d=a("Start");r.appendChild(d),d.addEventListener("pointerdown",()=>{E.elem.voiceButton.style.top="0px",E.elem.voiceButton.style.left=window.innerWidth*.8+"px",C.isRecording=!0,L.startRecordingWithSilenceDetection()});let p=a("Copy");r.appendChild(p),p.addEventListener("pointerdown",m=>{m.preventDefault(),window.getSelection().toString().length>0?document.execCommand("copy"):s.copyToClipboard(s.getCurrentLineString(document.activeElement)),s.showToast("Copied to clipboard")}),a("Cut",()=>{document.execCommand("copy"),document.execCommand("delete"),s.showToast("Cut to clipboard")});let b=a("Paste");r.appendChild(b),b.addEventListener("pointerdown",async m=>{m.preventDefault();try{let g=await navigator.clipboard.readText();s.writeText(document.activeElement,g),console.log("Clipboard text:",g)}catch(g){console.error("Clipboard access denied:",g)}});let k=a("Enter");r.appendChild(k),k.addEventListener("pointerdown",m=>{m.preventDefault(),document.execCommand("insertText",!1,`
-`)}),a("Correct",()=>{L.chat(`correct mistakes of the text, put the corrected text in the codeblock:
- `)});let u=a("Ask");u.style.touchAction="none",r.appendChild(u),u.addEventListener("pointerdown",m=>{m.preventDefault(),L.ask(),document.body.addEventListener("pointerup",()=>{L.stopRecording()},{once:!0})}),r.style.left=Math.min(o,l-r.offsetWidth*.5)+"px",r.style.top=Math.min(e,i-r.offsetHeight)-100+"px",document.body.appendChild(r)}};E.init();"serviceWorker"in navigator&&window.addEventListener("load",()=>{navigator.serviceWorker.register("service-worker.js").then(o=>{console.log("Service Worker registered with scope: ",o.scope)}).catch(o=>{console.log("Service Worker registration failed: ",o)})});var A=document.createElement("button");A.id="clearCacheButton";A.textContent="v0.2";Object.assign(A.style,{position:"fixed",bottom:"0px",right:"0px",padding:"10px 20px",backgroundColor:"#f44336",color:"white",border:"none",borderRadius:"5px",cursor:"pointer",boxShadow:"0px 4px 6px rgba(0, 0, 0, 0.1)"});A.addEventListener("click",()=>{window.confirm("updated?")&&(caches.keys().then(o=>{for(let e of o)caches.delete(e)}),navigator.serviceWorker.getRegistrations().then(function(o){for(let e of o)if(e.scope==="/service-worker.js"){e.unregister().then(function(){console.log("Service worker unregistered.")}).catch(function(t){console.error("Error unregistering service worker:",t)});break}}),alert("updated!"))});document.body.appendChild(A);
-  
+      `;
+        menuItem.textContent = textContent;
+        menuItem.addEventListener("pointerdown", (event) => {
+          event.preventDefault();
+          if (handler) {
+            handler();
+          }
+        });
+        return menuItem;
+      }
+      const removeMenuItem = createMenuItem("Remove Menu");
+      removeMenuItem.addEventListener(
+        "pointerdown",
+        () => menuContainer.remove()
+      );
+      menuContainer.appendChild(removeMenuItem);
+      const closeButton = createMenuItem("Close");
+      closeButton.addEventListener("pointerdown", () => {
+        if (confirm("remove the AI tool now?")) {
+          clearInterval(appModel.keepButtonAliveInterval);
+          view.elem.voiceButton.remove();
+          menuContainer.remove();
+        }
+      });
+      menuContainer.appendChild(closeButton);
+      createMenuItem("TTS", () => {
+        let currentLineString = utils.getCurrentLineString(document.activeElement);
+        let selectText = window.getSelection().toString();
+        let ttstext = selectText.length >= 1 ? selectText : currentLineString;
+        utils.tts(
+          ttstext,
+          "de-DE-SeraphinaMultilingualNeural"
+        );
+      });
+      const startMenuItem = createMenuItem("Start");
+      menuContainer.appendChild(startMenuItem);
+      startMenuItem.addEventListener("pointerdown", () => {
+        view.elem.voiceButton.style.top = "0px";
+        view.elem.voiceButton.style.left = window.innerWidth * 0.8 + "px";
+        appModel.isRecording = true;
+        controller.startRecordingWithSilenceDetection();
+      });
+      let copyButton = createMenuItem("Copy");
+      menuContainer.appendChild(copyButton);
+      copyButton.addEventListener("pointerdown", (e) => {
+        e.preventDefault();
+        if (window.getSelection().toString().length > 0) {
+          document.execCommand("copy");
+        } else {
+          utils.copyToClipboard(utils.getCurrentLineString(document.activeElement));
+        }
+        utils.showToast("Copied to clipboard");
+      });
+      createMenuItem("Cut", () => {
+        document.execCommand("copy");
+        document.execCommand("delete");
+        utils.showToast("Cut to clipboard");
+      });
+      let pasteButton = createMenuItem("Paste");
+      menuContainer.appendChild(pasteButton);
+      pasteButton.addEventListener("pointerdown", async (e) => {
+        e.preventDefault();
+        try {
+          const text = await navigator.clipboard.readText();
+          utils.writeText(document.activeElement, text);
+          console.log("Clipboard text:", text);
+        } catch (err) {
+          console.error("Clipboard access denied:", err);
+        }
+      });
+      let enterButton = createMenuItem("Enter");
+      menuContainer.appendChild(enterButton);
+      enterButton.addEventListener("pointerdown", (e) => {
+        e.preventDefault();
+        document.execCommand("insertText", false, "\n");
+      });
+      createMenuItem("Correct", () => {
+        let correctPrompt = "correct mistakes of the text, put the corrected text in the codeblock:\n ";
+        controller.chat(correctPrompt);
+      });
+      let askButton = createMenuItem("Ask");
+      askButton.style.touchAction = "none";
+      menuContainer.appendChild(askButton);
+      askButton.addEventListener("pointerdown", (e) => {
+        e.preventDefault();
+        controller.ask();
+        document.body.addEventListener("pointerup", () => {
+          controller.stopRecording();
+        }, { once: true });
+      });
+      menuContainer.style.left = Math.min(x, windowWidth - menuContainer.offsetWidth * 0.5) + "px";
+      menuContainer.style.top = Math.min(y, windowHeight - menuContainer.offsetHeight) - 100 + "px";
+      document.body.appendChild(menuContainer);
+    }
+  };
+
+  // index.js
+  view.init();
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("service-worker.js").then((registration) => {
+        console.log("Service Worker registered with scope: ", registration.scope);
+      }).catch((err) => {
+        console.log("Service Worker registration failed: ", err);
+      });
+    });
+  }
+  var button = document.createElement("button");
+  button.id = "clearCacheButton";
+  button.textContent = "v0.2";
+  Object.assign(button.style, {
+    position: "fixed",
+    bottom: "0px",
+    right: "0px",
+    padding: "10px 20px",
+    backgroundColor: "#f44336",
+    // Red background
+    color: "white",
+    // White text
+    border: "none",
+    borderRadius: "5px",
+    cursor: "pointer",
+    boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)"
+  });
+  button.addEventListener("click", () => {
+    if (window.confirm("updated?")) {
+      caches.keys().then((names) => {
+        for (let name of names)
+          caches.delete(name);
+      });
+      navigator.serviceWorker.getRegistrations().then(function (registrations) {
+        for (let registration of registrations) {
+          if (registration.scope === "/service-worker.js") {
+            registration.unregister().then(function () {
+              console.log("Service worker unregistered.");
+            }).catch(function (error) {
+              console.error("Error unregistering service worker:", error);
+            });
+            break;
+          }
+        }
+      });
+      alert("updated!");
+    }
+  });
+  document.body.appendChild(button);
 
 
 
 
+
+  //end of aiinput.js
 }

@@ -100,9 +100,16 @@ chrome.storage.onChanged.addListener((changes, area) => {
   }
 });
 
+// Modify CSP headers if the option is enabled
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area === 'sync' && changes.modifyCspEnabled) {
+    updateCspRules(changes.modifyCspEnabled.newValue);
+  }
+});
+
 function updateCspRules(enable) {
+  console.log('updateCspRules', enable);
   if (enable) {
-    console.log('updateCspRules', enable);
     chrome.declarativeNetRequest.updateDynamicRules({
       addRules: [{
         id: 1,
@@ -110,7 +117,7 @@ function updateCspRules(enable) {
         action: {
           type: 'modifyHeaders',
           responseHeaders: [
-            { header: 'Content-Security-Policy', operation: 'set', value: "frame-src *;" }
+            { header: 'Content-Security-Policy', operation: 'set',value: " "},
           ]
         },
         condition: {
@@ -121,7 +128,6 @@ function updateCspRules(enable) {
       removeRuleIds: [1]
     });
   } else {
-    console.log('updateCspRules', enable);
     chrome.declarativeNetRequest.updateDynamicRules({
       removeRuleIds: [1]
     });
@@ -165,7 +171,7 @@ setInterval(() => {
         target: { tabId: tabId },
         func: () => {
           const csp = document.querySelector('meta[http-equiv="Content-Security-Policy"]');
-          return csp ? csp.content : 'No CSP header found';
+          return csp ? csp.content : 'No CSP header found in html, it may set via header or inline';
         }
       }, (results) => {
         if (results && results.length > 0) {
